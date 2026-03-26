@@ -364,12 +364,25 @@ function PasteForm({
 
   return (
     <div className="">
-      <div className="max-w-4xl mx-auto px-6 py-3">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-3">
 
-        <div className="flex items-center gap-2">
+        {/* Mobile: stacked — Desktop: single row */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
 
-          {/* ① Description */}
-          <div className="flex-1 flex items-center border border-black px-4 h-9 min-w-0">
+          {/* ① URL */}
+          <div className="flex-1 flex items-center border border-black px-3 h-10 min-w-0">
+            <input
+              type="text"
+              value={url}
+              onChange={(e) => handleUrlChange(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSave()}
+              placeholder="https://threads.com/…"
+              className="w-full text-xs font-mono text-gray-600 placeholder:text-gray-400 focus:outline-none bg-transparent truncate"
+            />
+          </div>
+
+          {/* ② Description */}
+          <div className="flex-1 flex items-center border border-black px-3 h-10 min-w-0">
             <input
               type="text"
               value={desc}
@@ -385,64 +398,55 @@ function PasteForm({
             )}
           </div>
 
-          {/* ② URL — muted, monospace */}
-          <div className="w-44 shrink-0 flex items-center border border-black px-4 h-9">
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => handleUrlChange(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              placeholder="https://threads.com/…"
-              className="w-full text-[11px] font-mono text-gray-500 placeholder:text-gray-400 focus:outline-none bg-transparent truncate"
-            />
+          {/* ③ Category + Save row on mobile */}
+          <div className="flex items-center gap-2">
+
+            <div className="flex-1 sm:w-36 sm:flex-none flex items-center border border-black px-3 h-10">
+              {category === "__new__" ? (
+                <input
+                  autoFocus
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onBlur={() => { if (!newTag.trim()) setCategory(""); }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSave();
+                    if (e.key === "Escape") { setCategory(""); setNewTag(""); }
+                  }}
+                  placeholder="New tag…"
+                  className="w-full text-[11px] uppercase tracking-[0.15em] focus:outline-none bg-transparent placeholder:text-gray-400 text-black"
+                />
+              ) : (
+                <div className="relative flex items-center w-full">
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full text-[11px] uppercase tracking-[0.15em] text-gray-600 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5"
+                  >
+                    <option value="">Category</option>
+                    {allTags.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                    <option value="__new__">+ New…</option>
+                  </select>
+                  <svg className="pointer-events-none absolute right-0 w-3 h-3 text-gray-500 shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M2 4l4 4 4-4" />
+                  </svg>
+                </div>
+              )}
+            </div>
+
+            {/* Save button */}
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={status === "saving" || status === "unfurling"}
+              className="shrink-0 h-10 border border-black px-5 text-[10px] tracking-[0.3em] uppercase font-semibold bg-black text-white hover:bg-white hover:text-black transition-colors disabled:opacity-40"
+            >
+              {status === "saving" || status === "unfurling" ? "…" : status === "saved" ? "✓" : "Save"}
+            </button>
+
           </div>
-
-          {/* ③ Category */}
-          <div className="w-36 shrink-0 flex items-center border border-black px-4 h-9">
-            {category === "__new__" ? (
-              <input
-                autoFocus
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onBlur={() => { if (!newTag.trim()) setCategory(""); }}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSave();
-                  if (e.key === "Escape") { setCategory(""); setNewTag(""); }
-                }}
-                placeholder="New tag…"
-                className="w-full text-[11px] uppercase tracking-[0.15em] focus:outline-none bg-transparent placeholder:text-gray-400 text-black"
-              />
-            ) : (
-              <div className="relative flex items-center w-full">
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full text-[11px] uppercase tracking-[0.15em] text-gray-600 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5"
-                >
-                  <option value="">Category</option>
-                  {allTags.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                  <option value="__new__">+ New…</option>
-                </select>
-                <svg className="pointer-events-none absolute right-0 w-3 h-3 text-gray-500 shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M2 4l4 4 4-4" />
-                </svg>
-              </div>
-            )}
-          </div>
-
-          {/* Save button — vertically centered beside the stack */}
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={status === "saving" || status === "unfurling"}
-            className="shrink-0 self-stretch border border-black px-6 text-[10px] tracking-[0.3em] uppercase font-semibold bg-black text-white hover:bg-white hover:text-black transition-colors disabled:opacity-40"
-          >
-            {status === "saving" || status === "unfurling" ? "Saving…" : status === "saved" ? "Saved ✓" : "Save"}
-          </button>
-
         </div>
 
         {errorMsg && (
