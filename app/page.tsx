@@ -370,7 +370,7 @@ function PasteForm({
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
 
           {/* ① URL */}
-          <div className="flex-1 flex items-center border border-black px-3 h-12 sm:h-10 min-w-0">
+          <div className="flex-1 flex items-center border border-black px-3 min-w-0" style={{ height: '48px' }}>
             <input
               type="text"
               value={url}
@@ -382,7 +382,7 @@ function PasteForm({
           </div>
 
           {/* ② Description */}
-          <div className="flex-1 flex items-center border border-black px-3 h-12 sm:h-10 min-w-0">
+          <div className="flex-1 flex items-center border border-black px-3 min-w-0" style={{ height: '48px' }}>
             <input
               type="text"
               value={desc}
@@ -401,7 +401,7 @@ function PasteForm({
           {/* ③ Category + Save row on mobile */}
           <div className="flex items-center gap-2">
 
-            <div className="flex-1 sm:w-36 sm:flex-none flex items-center border border-black px-3 h-12 sm:h-10">
+            <div className="flex-1 sm:w-36 sm:flex-none flex items-center border border-black px-3" style={{ height: '48px' }}>
               {category === "__new__" ? (
                 <input
                   autoFocus
@@ -441,7 +441,8 @@ function PasteForm({
               type="button"
               onClick={handleSave}
               disabled={status === "saving" || status === "unfurling"}
-              className="shrink-0 h-12 sm:h-10 border border-black px-5 text-[10px] tracking-[0.3em] uppercase font-semibold bg-black text-white hover:bg-white hover:text-black transition-colors disabled:opacity-40"
+              style={{ height: '48px' }}
+              className="shrink-0 border border-black px-5 text-[10px] tracking-[0.3em] uppercase font-semibold bg-black text-white hover:bg-white hover:text-black transition-colors disabled:opacity-40"
             >
               {status === "saving" || status === "unfurling" ? "…" : status === "saved" ? "✓" : "Save"}
             </button>
