@@ -116,13 +116,17 @@ function ThreadRow({
   index,
   onTagsChange,
   onDelete,
+  onUpdate,
 }: {
   thread: SavedThread;
   index: number;
   onTagsChange: (id: string, tags: string[]) => void;
   onDelete: (id: string) => void;
+  onUpdate: (id: string, patch: Partial<SavedThread>) => void;
 }) {
   const [deleting, setDeleting] = useState(false);
+  const [editingNote, setEditingNote] = useState(false);
+  const [note, setNote] = useState(thread.notes ?? "");
 
   const formattedDate = new Date(thread.saved_at).toLocaleDateString("en-US", {
     month: "short",
@@ -130,40 +134,59 @@ function ThreadRow({
     year: "numeric",
   });
 
+  const supabase = createClient();
+
   const handleDelete = async () => {
     if (!confirm("Remove this thread?")) return;
     setDeleting(true);
-    const supabase = createClient();
     await supabase.from("threads").delete().eq("id", thread.id);
     onDelete(thread.id);
   };
 
-  // Truncate URL: show up to 40 chars then …
+  const toggleRead = async () => {
+    const is_read = !thread.is_read;
+    await supabase.from("threads").update({ is_read }).eq("id", thread.id);
+    onUpdate(thread.id, { is_read });
+  };
+
+  const saveNote = async () => {
+    setEditingNote(false);
+    if (note === (thread.notes ?? "")) return;
+    await supabase.from("threads").update({ notes: note || null }).eq("id", thread.id);
+    onUpdate(thread.id, { notes: note || null });
+  };
+
   const shortUrl = thread.url.length > 48
     ? thread.url.slice(0, 48) + "…"
     : thread.url;
 
   return (
     <div
-      className={`group grid grid-cols-[32px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
-        deleting ? "opacity-40 pointer-events-none" : ""
-      }`}
+      className={`group grid grid-cols-[20px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 transition-colors ${
+        thread.is_read ? "bg-gray-50/60" : "hover:bg-gray-50"
+      } ${deleting ? "opacity-40 pointer-events-none" : ""}`}
       style={{ animation: `fadeUp 0.4s ease both`, animationDelay: `${index * 40}ms` }}
     >
-      {/* Index */}
-      <span className="text-[10px] text-gray-500 font-mono pt-0.5 select-none">
-        {String(index + 1).padStart(2, "0")}
-      </span>
+      {/* Read toggle dot */}
+      <button
+        onClick={toggleRead}
+        title={thread.is_read ? "Mark unread" : "Mark read"}
+        className="mt-1 shrink-0 w-2 h-2 rounded-full border transition-colors self-start"
+        style={{
+          borderColor: thread.is_read ? "#d1d5db" : "#000",
+          backgroundColor: thread.is_read ? "#d1d5db" : "#000",
+        }}
+      />
 
-      {/* Content — three lines */}
+      {/* Content */}
       <div className="min-w-0 space-y-1">
 
         {/* Line 1: Description */}
-        <p className="text-sm font-medium text-black leading-snug line-clamp-2">
+        <p className={`text-sm font-medium leading-snug line-clamp-2 ${thread.is_read ? "text-gray-400" : "text-black"}`}>
           {thread.description || thread.title || "Untitled"}
         </p>
 
-        {/* Line 2: Muted URL — clickable with underline on hover */}
+        {/* Line 2: Muted URL */}
         <a
           href={thread.url}
           target="_blank"
@@ -181,11 +204,38 @@ function ThreadRow({
             onChange={(tags) => onTagsChange(thread.id, tags)}
           />
         </div>
+
+        {/* Line 4: Notes */}
+        <div className="pt-1">
+          {editingNote ? (
+            <textarea
+              autoFocus
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              onBlur={saveNote}
+              onKeyDown={(e) => { if (e.key === "Escape") saveNote(); }}
+              rows={2}
+              placeholder="Add a note…"
+              className="w-full text-xs text-gray-600 bg-gray-50 border border-gray-200 px-2 py-1.5 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
+            />
+          ) : (
+            <button
+              onClick={() => setEditingNote(true)}
+              className={`text-xs text-left block w-full transition-colors ${
+                note
+                  ? "text-gray-600 hover:text-black"
+                  : "text-gray-300 hover:text-gray-500 opacity-0 group-hover:opacity-100"
+              }`}
+            >
+              {note || "Add note…"}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Meta + delete */}
-      <div className="flex flex-col items-end justify-between shrink-0">
-        <span className="text-[9px] text-gray-500 tracking-wide">
+      <div className="flex flex-col items-end justify-between shrink-0 min-w-[60px]">
+        <span className="text-[9px] text-gray-500 tracking-wide whitespace-nowrap">
           {formattedDate}
         </span>
         <button
@@ -407,12 +457,16 @@ function PasteForm({
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
+type SortOrder = "newest" | "oldest";
+
 export default function LibraryPage() {
   const [threads, setThreads] = useState<SavedThread[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [activeTag, setActiveTag] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortOrder>("newest");
   const router = useRouter();
 
   useEffect(() => {
@@ -440,23 +494,39 @@ export default function LibraryPage() {
   };
 
   const handleTagsChange = (id: string, tags: string[]) => {
-    setThreads((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, tags } : t))
-    );
+    setThreads((prev) => prev.map((t) => (t.id === id ? { ...t, tags } : t)));
   };
 
   const handleDelete = (id: string) => {
     setThreads((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // All unique tags across all threads
+  const handleUpdate = (id: string, patch: Partial<SavedThread>) => {
+    setThreads((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
+  };
+
+  // All unique tags
   const allTags = Array.from(
     new Set(threads.flatMap((t) => t.tags ?? []))
   ).sort();
 
-  const filtered = activeTag
-    ? threads.filter((t) => t.tags?.includes(activeTag))
-    : threads;
+  // Apply filters + search + sort
+  const filtered = threads
+    .filter((t) => !activeTag || t.tags?.includes(activeTag))
+    .filter((t) => {
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        t.description?.toLowerCase().includes(q) ||
+        t.title?.toLowerCase().includes(q) ||
+        t.url.toLowerCase().includes(q) ||
+        t.notes?.toLowerCase().includes(q)
+      );
+    })
+    .sort((a, b) => {
+      const diff = new Date(a.saved_at).getTime() - new Date(b.saved_at).getTime();
+      return sort === "newest" ? -diff : diff;
+    });
 
   const count = filtered.length;
 
@@ -506,29 +576,55 @@ export default function LibraryPage() {
       {/* ── Paste form ── */}
       <PasteForm onSaved={(t) => setThreads((prev) => [t, ...prev])} allTags={allTags} />
 
-      {/* ── Tag filter bar ── */}
-      {allTags.length > 0 && (
-        <div className="border-b border-gray-100">
-          <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-2 flex-wrap">
-            <span className="text-[9px] tracking-[0.25em] uppercase text-gray-700 mr-1">
-              Filter
-            </span>
-            <TagPill
-              tag="All"
-              active={activeTag === null}
-              onClick={() => setActiveTag(null)}
+      {/* ── Search + Sort + Filter toolbar ── */}
+      <div className="border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-6 py-3 flex items-center gap-4 flex-wrap">
+
+          {/* Search */}
+          <div className="flex-1 min-w-[180px] flex items-center border border-gray-200 px-3 h-8 gap-2 focus-within:border-black transition-colors">
+            <svg className="w-3 h-3 text-gray-400 shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="5" cy="5" r="3.5" /><path d="M8 8l2.5 2.5" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search threads…"
+              className="flex-1 text-xs text-black placeholder:text-gray-400 focus:outline-none bg-transparent"
             />
-            {allTags.map((tag) => (
-              <TagPill
-                key={tag}
-                tag={tag}
-                active={activeTag === tag}
-                onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              />
+            {search && (
+              <button onClick={() => setSearch("")} className="text-gray-400 hover:text-black text-xs leading-none">×</button>
+            )}
+          </div>
+
+          {/* Sort */}
+          <div className="flex items-center gap-1 shrink-0">
+            {(["newest", "oldest"] as SortOrder[]).map((s) => (
+              <button
+                key={s}
+                onClick={() => setSort(s)}
+                className={`text-[9px] tracking-[0.2em] uppercase px-2.5 py-1 border transition-colors ${
+                  sort === s ? "border-black bg-black text-white" : "border-gray-200 text-gray-500 hover:border-black hover:text-black"
+                }`}
+              >
+                {s}
+              </button>
             ))}
           </div>
+
+          {/* Tag filter */}
+          {allTags.length > 0 && (
+            <div className="flex items-center gap-1.5 flex-wrap shrink-0">
+              <span className="text-[9px] tracking-[0.25em] uppercase text-gray-500">Tag</span>
+              <TagPill tag="All" active={activeTag === null} onClick={() => setActiveTag(null)} />
+              {allTags.map((tag) => (
+                <TagPill key={tag} tag={tag} active={activeTag === tag} onClick={() => setActiveTag(activeTag === tag ? null : tag)} />
+              ))}
+            </div>
+          )}
+
         </div>
-      )}
+      </div>
 
       {/* ── List ── */}
       <main className="max-w-4xl mx-auto">
@@ -551,7 +647,7 @@ export default function LibraryPage() {
             ))}
           </div>
         ) : filtered.length === 0 ? (
-          <EmptyState filtered={activeTag !== null} />
+          <EmptyState filtered={activeTag !== null || search.length > 0} />
         ) : (
           filtered.map((thread, i) => (
             <ThreadRow
@@ -560,6 +656,7 @@ export default function LibraryPage() {
               index={i}
               onTagsChange={handleTagsChange}
               onDelete={handleDelete}
+              onUpdate={handleUpdate}
             />
           ))
         )}

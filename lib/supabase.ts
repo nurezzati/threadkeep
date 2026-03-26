@@ -10,6 +10,8 @@ export interface SavedThread {
   saved_at: string;
   user_id: string;
   tags: string[];
+  notes: string | null;
+  is_read: boolean;
 }
 
 export async function saveThread(
@@ -19,9 +21,11 @@ export async function saveThread(
   const { createClient } = await import("./supabase/client");
   const supabase = createClient();
 
+  const { data: { user } } = await supabase.auth.getUser();
+
   const { data, error } = await supabase
     .from("threads")
-    .insert([{ url, ...meta }])
+    .insert([{ url, user_id: user?.id ?? null, ...meta }])
     .select()
     .single();
 
