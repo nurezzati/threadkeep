@@ -370,7 +370,7 @@ function PasteForm({
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
 
           {/* ① URL */}
-          <div className="flex-1 flex items-center border border-black px-3 h-15 sm:h-10 min-w-0">
+          <div className="flex-1 flex items-center border border-black px-3 h-8 sm:h-10 min-w-0">
             <input
               type="text"
               value={url}
@@ -382,7 +382,7 @@ function PasteForm({
           </div>
 
           {/* ② Description */}
-          <div className="flex-1 flex items-center border border-black px-3 h-11 sm:h-10 min-w-0">
+          <div className="flex-1 flex items-center border border-black px-3 h-8 sm:h-10 min-w-0">
             <input
               type="text"
               value={desc}
