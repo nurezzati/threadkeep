@@ -388,7 +388,7 @@ function PasteForm({
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              placeholder="Description or note…"
+              placeholder="Description or notes…"
               className="flex-1 text-xs text-black placeholder:text-gray-400 focus:outline-none bg-transparent min-w-0"
             />
             {desc && (
