@@ -62,7 +62,7 @@ export function SaveCapture() {
 
     try {
       const parsed = new URL(rawUrl);
-      if (!parsed.hostname.endsWith("threads.net")) {
+      if (!parsed.hostname.endsWith("threads.net") && !parsed.hostname.endsWith("threads.com")) {
         setStatus("error");
         setErrorMsg("Only Threads links are supported.");
         return;
