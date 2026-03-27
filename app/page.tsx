@@ -21,7 +21,7 @@ function TagPill({
   return (
     <span
       onClick={onClick}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] tracking-[0.15em] uppercase border transition-colors ${
+      className={`inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-sans border transition-colors ${
         active
           ? "border-black bg-black text-white"
           : "border-gray-400 text-gray-600 hover:border-black hover:text-black"
