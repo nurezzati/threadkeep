@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { saveThread } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 type CaptureStatus = "detecting" | "unfurling" | "confirm" | "saving" | "done" | "error";
 
@@ -51,6 +52,18 @@ export function SaveCapture() {
   const [meta, setMeta] = useState<OGMeta | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [editDesc, setEditDesc] = useState("");
+  const [editTag, setEditTag] = useState("");
+  const [existingTags, setExistingTags] = useState<string[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from("threads").select("tags").then(({ data }) => {
+      if (data) {
+        const tags = Array.from(new Set(data.flatMap((r) => r.tags ?? []))).sort();
+        setExistingTags(tags);
+      }
+    });
+  }, []);
 
   useEffect(() => {
     const rawUrl =
@@ -105,6 +118,7 @@ export function SaveCapture() {
       title: meta?.title ?? undefined,
       description: editDesc || undefined,
       image: meta?.image ?? undefined,
+      tags: editTag ? [editTag] : [],
     });
     if (error) {
       setStatus("error");
@@ -148,7 +162,7 @@ export function SaveCapture() {
           </p>
 
           {isConfirm && (
-            <div className="space-y-4">
+            <div className="space-y-3">
               <textarea
                 value={editDesc}
                 onChange={(e) => setEditDesc(e.target.value)}
@@ -156,6 +170,18 @@ export function SaveCapture() {
                 placeholder="Add a description…"
                 className="w-full text-xs text-black bg-gray-50 border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
               />
+              <div className="flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
+                <select
+                  value={editTag}
+                  onChange={(e) => setEditTag(e.target.value)}
+                  className="w-full text-xs font-sans text-gray-600 bg-transparent focus:outline-none appearance-none cursor-pointer"
+                >
+                  <option value="">Category (optional)</option>
+                  {existingTags.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
               <button
                 onClick={handleSave}
                 className="w-full h-10 border border-black bg-black text-white text-[10px] tracking-[0.3em] uppercase font-semibold hover:bg-white hover:text-black transition-colors"
