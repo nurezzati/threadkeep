@@ -163,7 +163,7 @@ export function SaveCapture() {
                 onChange={(e) => setEditDesc(e.target.value)}
                 rows={3}
                 placeholder="Add a description…"
-                className="w-full text-xs text-black bg-gray-50 border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
+                className="w-full text-xs text-black bg-white border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
               />
               {editTag === "__new__" ? (
                 <input
@@ -177,11 +177,11 @@ export function SaveCapture() {
                   className="w-full border border-gray-200 px-3 h-10 text-xs font-sans text-black focus:outline-none focus:border-black placeholder:text-gray-400"
                 />
               ) : (
-                <div className="flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
+                <div className="relative flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
                   <select
                     value={editTag}
                     onChange={(e) => setEditTag(e.target.value)}
-                    className="w-full text-xs font-sans text-gray-600 bg-transparent focus:outline-none appearance-none cursor-pointer"
+                    className="w-full text-xs font-sans text-black bg-transparent focus:outline-none appearance-none cursor-pointer pr-5"
                   >
                     <option value="">Category</option>
                     {existingTags.map((t) => (
@@ -189,6 +189,9 @@ export function SaveCapture() {
                     ))}
                     <option value="__new__">+ New…</option>
                   </select>
+                  <svg className="pointer-events-none absolute right-3 w-3 h-3 text-gray-500 shrink-0" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M2 4l4 4 4-4" />
+                  </svg>
                 </div>
               )}
               <button
