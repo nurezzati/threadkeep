@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { saveThread } from "@/lib/supabase";
 
-type CaptureStatus = "detecting" | "unfurling" | "saving" | "done" | "error";
+type CaptureStatus = "detecting" | "unfurling" | "confirm" | "saving" | "done" | "error";
 
 interface OGMeta {
   title: string | null;
@@ -36,6 +36,7 @@ function LoadingSkeleton() {
 const STATUS_LABELS: Record<CaptureStatus, string> = {
   detecting: "Detecting URL…",
   unfurling: "Fetching preview…",
+  confirm: "Review before saving.",
   saving: "Saving thread…",
   done: "Saved.",
   error: "Something went wrong.",
@@ -49,6 +50,7 @@ export function SaveCapture() {
   const [url, setUrl] = useState<string | null>(null);
   const [meta, setMeta] = useState<OGMeta | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [editDesc, setEditDesc] = useState("");
 
   useEffect(() => {
     const rawUrl =
@@ -89,29 +91,34 @@ export function SaveCapture() {
         // Non-fatal — save bare URL
       }
 
-      setStatus("saving");
-      const { error } = await saveThread(link, {
-        title: ogMeta.title ?? undefined,
-        description: ogMeta.description ?? undefined,
-        image: ogMeta.image ?? undefined,
-      });
-
-      if (error) {
-        setStatus("error");
-        setErrorMsg(error.message);
-        return;
-      }
-
-      setStatus("done");
-      setTimeout(() => router.push("/"), 1800);
+      setEditDesc(ogMeta.description ?? ogMeta.title ?? "");
+      setStatus("confirm");
     }
 
     run(rawUrl);
   }, [params, router]);
 
+  const handleSave = async () => {
+    if (!url) return;
+    setStatus("saving");
+    const { error } = await saveThread(url, {
+      title: meta?.title ?? undefined,
+      description: editDesc || undefined,
+      image: meta?.image ?? undefined,
+    });
+    if (error) {
+      setStatus("error");
+      setErrorMsg(error.message);
+      return;
+    }
+    setStatus("done");
+    setTimeout(() => router.push("/"), 1800);
+  };
+
   const isDone = status === "done";
   const isError = status === "error";
-  const isLoading = !isDone && !isError;
+  const isConfirm = status === "confirm";
+  const isLoading = !isDone && !isError && !isConfirm;
 
   return (
     <main className="min-h-screen bg-white flex items-center justify-center px-6 py-12">
@@ -139,6 +146,24 @@ export function SaveCapture() {
           >
             {isError ? errorMsg : STATUS_LABELS[status]}
           </p>
+
+          {isConfirm && (
+            <div className="space-y-4">
+              <textarea
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                rows={3}
+                placeholder="Add a description…"
+                className="w-full text-xs text-black bg-gray-50 border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
+              />
+              <button
+                onClick={handleSave}
+                className="w-full h-10 border border-black bg-black text-white text-[10px] tracking-[0.3em] uppercase font-semibold hover:bg-white hover:text-black transition-colors"
+              >
+                Save
+              </button>
+            </div>
+          )}
 
           {isLoading && !meta && <LoadingSkeleton />}
 
