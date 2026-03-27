@@ -421,7 +421,7 @@ function PasteForm({
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full text-[11px] uppercase tracking-[0.15em] text-gray-600 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5"
+                    className="w-full text-xs font-sans text-gray-600 bg-transparent focus:outline-none cursor-pointer appearance-none pr-5"
                   >
                     <option value="">Category</option>
                     {allTags.map((t) => (
