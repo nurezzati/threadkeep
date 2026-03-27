@@ -163,7 +163,7 @@ export function SaveCapture() {
                 onChange={(e) => setEditDesc(e.target.value)}
                 rows={3}
                 placeholder="Add a description…"
-                className="w-full text-xs text-black bg-white border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
+                className="w-full text-xs text-black bg-white border border-black px-3 py-2 resize-none focus:outline-none placeholder:text-black"
               />
               {editTag === "__new__" ? (
                 <input
@@ -174,10 +174,10 @@ export function SaveCapture() {
                   onBlur={() => { if (!newTag.trim()) setEditTag(""); }}
                   onKeyDown={(e) => { if (e.key === "Escape") { setEditTag(""); setNewTag(""); } }}
                   placeholder="New category…"
-                  className="w-full border border-gray-200 px-3 h-10 text-xs font-sans text-black focus:outline-none focus:border-black placeholder:text-gray-400"
+                  className="w-full border border-black px-3 h-10 text-xs font-sans text-black focus:outline-none placeholder:text-black"
                 />
               ) : (
-                <div className="relative flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
+                <div className="relative flex items-center border border-black px-3 h-10">
                   <select
                     value={editTag}
                     onChange={(e) => setEditTag(e.target.value)}
