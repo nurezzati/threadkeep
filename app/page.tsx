@@ -170,7 +170,7 @@ function ThreadRow({
       <button
         onClick={toggleRead}
         title={thread.is_read ? "Mark unread" : "Mark read"}
-        className="self-start mt-1 shrink-0 transition-colors"
+        className="self-start mt-1 shrink-0 text-black"
       >
         <svg viewBox="0 0 12 14" className="w-3 h-3.5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
           <path d="M1 1h10v12L6 9.5 1 13V1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
