@@ -53,6 +53,7 @@ export function SaveCapture() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [editDesc, setEditDesc] = useState("");
   const [editTag, setEditTag] = useState("");
+  const [newTag, setNewTag] = useState("");
   const [existingTags, setExistingTags] = useState<string[]>([]);
 
   useEffect(() => {
@@ -118,7 +119,7 @@ export function SaveCapture() {
       title: meta?.title ?? undefined,
       description: editDesc || undefined,
       image: meta?.image ?? undefined,
-      tags: editTag ? [editTag] : [],
+      tags: editTag === "__new__" ? (newTag.trim() ? [newTag.trim().toLowerCase()] : []) : editTag ? [editTag] : [],
     });
     if (error) {
       setStatus("error");
@@ -150,13 +151,7 @@ export function SaveCapture() {
         {/* Body */}
         <div className="px-6 py-8 space-y-6">
           <p
-            className={`text-[11px] tracking-[0.2em] uppercase font-medium transition-colors ${
-              isError
-                ? "text-red-500"
-                : isDone
-                ? "text-black"
-                : "text-gray-400"
-            }`}
+            className="text-[11px] tracking-[0.2em] uppercase font-medium text-black"
           >
             {isError ? errorMsg : STATUS_LABELS[status]}
           </p>
@@ -170,18 +165,32 @@ export function SaveCapture() {
                 placeholder="Add a description…"
                 className="w-full text-xs text-black bg-gray-50 border border-gray-200 px-3 py-2 resize-none focus:outline-none focus:border-black placeholder:text-gray-400"
               />
-              <div className="flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
-                <select
-                  value={editTag}
-                  onChange={(e) => setEditTag(e.target.value)}
-                  className="w-full text-xs font-sans text-gray-600 bg-transparent focus:outline-none appearance-none cursor-pointer"
-                >
-                  <option value="">Category (optional)</option>
-                  {existingTags.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
+              {editTag === "__new__" ? (
+                <input
+                  autoFocus
+                  type="text"
+                  value={newTag}
+                  onChange={(e) => setNewTag(e.target.value)}
+                  onBlur={() => { if (!newTag.trim()) setEditTag(""); }}
+                  onKeyDown={(e) => { if (e.key === "Escape") { setEditTag(""); setNewTag(""); } }}
+                  placeholder="New category…"
+                  className="w-full border border-gray-200 px-3 h-10 text-xs font-sans text-black focus:outline-none focus:border-black placeholder:text-gray-400"
+                />
+              ) : (
+                <div className="flex items-center border border-gray-200 px-3 h-10 focus-within:border-black transition-colors">
+                  <select
+                    value={editTag}
+                    onChange={(e) => setEditTag(e.target.value)}
+                    className="w-full text-xs font-sans text-gray-600 bg-transparent focus:outline-none appearance-none cursor-pointer"
+                  >
+                    <option value="">Category</option>
+                    {existingTags.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                    <option value="__new__">+ New…</option>
+                  </select>
+                </div>
+              )}
               <button
                 onClick={handleSave}
                 className="w-full h-10 border border-black bg-black text-white text-[10px] tracking-[0.3em] uppercase font-semibold hover:bg-white hover:text-black transition-colors"
@@ -217,7 +226,7 @@ export function SaveCapture() {
           )}
 
           {url && (
-            <p className="text-[10px] text-gray-300 font-mono truncate">{url}</p>
+            <p className="text-[10px] text-black font-mono truncate">{url}</p>
           )}
 
           {isLoading && (
