@@ -414,7 +414,7 @@ function PasteForm({
                     if (e.key === "Escape") { setCategory(""); setNewTag(""); }
                   }}
                   placeholder="New tag…"
-                  className="w-full text-[11px] uppercase tracking-[0.15em] focus:outline-none bg-transparent placeholder:text-gray-400 text-black"
+                  className="w-full text-xs font-sans focus:outline-none bg-transparent placeholder:text-gray-400 text-black"
                 />
               ) : (
                 <div className="relative flex items-center w-full">
