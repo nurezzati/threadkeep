@@ -162,37 +162,21 @@ function ThreadRow({
 
   return (
     <div
-      className={`group grid grid-cols-[auto_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 transition-colors ${
+      className={`group grid grid-cols-[16px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 transition-colors ${
         thread.is_read ? "bg-gray-50/60" : "hover:bg-gray-50"
       } ${deleting ? "opacity-40 pointer-events-none" : ""}`}
       style={{ animation: `fadeUp 0.4s ease both`, animationDelay: `${index * 40}ms` }}
     >
-      {/* Tag label */}
-      <div className="self-start pt-0.5">
-        {thread.tags?.[0] ? (
-          <button
-            onClick={toggleRead}
-            title={thread.is_read ? "Mark unread" : "Mark read"}
-            className={`text-[9px] font-sans px-1.5 py-0.5 border whitespace-nowrap transition-colors ${
-              thread.is_read
-                ? "border-gray-200 text-gray-400"
-                : "border-black text-black"
-            }`}
-          >
-            {thread.tags[0]}
-          </button>
-        ) : (
-          <button
-            onClick={toggleRead}
-            title={thread.is_read ? "Mark unread" : "Mark read"}
-            className="mt-1 shrink-0 w-2 h-2 rounded-full border transition-colors"
-            style={{
-              borderColor: thread.is_read ? "#d1d5db" : "#000",
-              backgroundColor: thread.is_read ? "#d1d5db" : "#000",
-            }}
-          />
-        )}
-      </div>
+      {/* Read toggle */}
+      <button
+        onClick={toggleRead}
+        title={thread.is_read ? "Mark unread" : "Mark read"}
+        className="self-start mt-1 shrink-0 transition-colors"
+      >
+        <svg viewBox="0 0 12 14" className="w-3 h-3.5" fill={thread.is_read ? "#d1d5db" : "currentColor"} xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1h10v12L6 9.5 1 13V1z" stroke={thread.is_read ? "#d1d5db" : "currentColor"} strokeWidth="1.2" strokeLinejoin="round"/>
+        </svg>
+      </button>
 
       {/* Content */}
       <div className="min-w-0 space-y-1">
