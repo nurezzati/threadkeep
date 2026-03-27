@@ -370,7 +370,7 @@ function PasteForm({
         <div className="flex flex-col sm:flex-row sm:items-center gap-2">
 
           {/* ① URL */}
-          <div className="w-full flex items-center border border-black px-3 min-w-0 h-14 sm:h-10">
+          <div className="w-full flex items-center border border-black px-3 min-w-0 h-10">
             <input
               type="text"
               value={url}
@@ -382,13 +382,13 @@ function PasteForm({
           </div>
 
           {/* ② Description */}
-          <div className="w-full flex items-center border border-black px-3 min-w-0 h-14 sm:h-10">
+          <div className="w-full flex items-center border border-black px-3 min-w-0 h-10">
             <input
               type="text"
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
-              placeholder="Description or notesss…"
+              placeholder="Description"
               className="flex-1 text-xs text-black placeholder:text-gray-400 focus:outline-none bg-transparent min-w-0"
             />
             {desc && (
