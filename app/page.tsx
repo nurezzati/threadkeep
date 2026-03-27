@@ -162,9 +162,8 @@ function ThreadRow({
 
   return (
     <div
-      className={`group grid grid-cols-[16px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 transition-colors ${
-        thread.is_read ? "bg-gray-50/60" : "hover:bg-gray-50"
-      } ${deleting ? "opacity-40 pointer-events-none" : ""}`}
+      className={`group grid grid-cols-[16px_1fr_auto] gap-4 px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors ${
+        deleting ? "opacity-40 pointer-events-none" : ""}`}
       style={{ animation: `fadeUp 0.4s ease both`, animationDelay: `${index * 40}ms` }}
     >
       {/* Read toggle */}
@@ -173,8 +172,8 @@ function ThreadRow({
         title={thread.is_read ? "Mark unread" : "Mark read"}
         className="self-start mt-1 shrink-0 transition-colors"
       >
-        <svg viewBox="0 0 12 14" className="w-3 h-3.5" fill={thread.is_read ? "#d1d5db" : "currentColor"} xmlns="http://www.w3.org/2000/svg">
-          <path d="M1 1h10v12L6 9.5 1 13V1z" stroke={thread.is_read ? "#d1d5db" : "currentColor"} strokeWidth="1.2" strokeLinejoin="round"/>
+        <svg viewBox="0 0 12 14" className="w-3 h-3.5" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1h10v12L6 9.5 1 13V1z" stroke="currentColor" strokeWidth="1.2" strokeLinejoin="round"/>
         </svg>
       </button>
 
@@ -182,7 +181,7 @@ function ThreadRow({
       <div className="min-w-0 space-y-1">
 
         {/* Line 1: Description */}
-        <p className={`text-sm font-medium leading-snug line-clamp-2 ${thread.is_read ? "text-gray-400" : "text-black"}`}>
+        <p className="text-sm font-medium leading-snug line-clamp-2 text-black">
           {thread.description || thread.title || "Untitled"}
         </p>
 
