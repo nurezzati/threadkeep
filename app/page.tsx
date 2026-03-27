@@ -377,7 +377,7 @@ function PasteForm({
               onChange={(e) => handleUrlChange(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSave()}
               placeholder="https://threads.com/…"
-              className="w-full text-xs font-mono text-gray-600 placeholder:text-gray-400 focus:outline-none bg-transparent truncate"
+              className="w-full text-xs font-sans text-gray-600 placeholder:text-gray-400 focus:outline-none bg-transparent truncate"
             />
           </div>
 
